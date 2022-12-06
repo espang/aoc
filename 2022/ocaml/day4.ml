@@ -27,5 +27,5 @@ let day4 input select =
   |> List.length
 
 
-let d4p1 input = print_int (day4 input fully_contained)
-let d4p2 input = print_int (day4 input any_overlap)
+let part1 input = print_int (day4 input fully_contained)
+let part2 input = print_int (day4 input any_overlap)

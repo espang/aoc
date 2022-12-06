@@ -45,13 +45,5 @@ let day5 handlef stacks input =
   Array.iter (fun list -> print_char (List.hd list)) stacks';
   print_newline ()
 
-let d5p1 = day5 handle_move (stack_from stack)
-let d5p2 = day5 handle_move2 (stack_from stack)
-
-(* 
-let input = "move 1 from 2 to 1
-move 3 from 1 to 3
-move 2 from 2 to 1
-move 1 from 1 to 2"
-
-d5p1 input *)
+let part1 = day5 handle_move (stack_from stack)
+let part2 = day5 handle_move2 (stack_from stack)

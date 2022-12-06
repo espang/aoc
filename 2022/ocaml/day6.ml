@@ -47,10 +47,10 @@ let solve n input =
   in
   s (make_tracker ()) (List.of_seq (String.to_seq input))
 
-let solve_part1 input = 
+let part1 input = 
   let index = solve 4 input in
   print_int index
 
-let solve_part2 input =
+let part2 input =
   let index = solve 14 input in
   print_int index
