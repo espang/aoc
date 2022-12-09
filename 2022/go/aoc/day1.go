@@ -7,24 +7,16 @@ import (
 	"strings"
 )
 
-func sumOfGroup(group []int) int {
-	total := 0
-	for _, val := range group {
-		total += val
-	}
-	return total
-}
-
 func sumOfGroups(groups [][]int) []int {
-	ret := make([]int, 0, len(groups))
-	for _, group := range groups {
-		ret = append(ret, sumOfGroup(group))
+	// poc; that is less readable than the for loop...
+	f := func(acc []int, val []int) []int {
+		return append(acc, sum(val))
 	}
-	return ret
+	return reduce(f, []int{}, groups)
 }
 
 func mustMaxOf(vs []int) int {
-	// this panics on purpose
+	// this panics on purpose when vs is empty
 	max := vs[0]
 	for _, v := range vs {
 		if v > max {
