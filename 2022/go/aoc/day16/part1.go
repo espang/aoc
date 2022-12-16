@@ -51,7 +51,8 @@ func distances(nodes []string, valves []Valve) [][]int {
 			start := nodes[row]
 			target := nodes[col]
 			// 1 is added for the opening of the valve; we will not visit
-			// any node twice to open a valve. Any further visit might
+			// any node twice to open a valve. Any further visit would be
+			// passing by going to a different target.
 			mat[row][col] = 1 + ShortestPath(start, target, valves)
 			// mirror the values for easier use
 			mat[col][row] = mat[row][col]

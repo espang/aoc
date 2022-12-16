@@ -37,7 +37,6 @@ func solvePart2(start string, maxTime int, valves []Valve) int {
 	var max int
 	var opened NodeSet
 	for i := range nodes {
-		// timeToReachIFromStart[i]
 		for j := i + 1; j < len(nodes); j++ {
 			p1TimeLeft := maxTime - timeToReachIFromStart[i]
 			p2TimeLeft := maxTime - timeToReachIFromStart[j]
