@@ -81,3 +81,35 @@ Sensor at x=17, y=20: closest beacon is at x=21, y=22
 Sensor at x=16, y=7: closest beacon is at x=15, y=3
 Sensor at x=14, y=3: closest beacon is at x=15, y=3
 Sensor at x=20, y=1: closest beacon is at x=15, y=3`
+
+type CoordinateSet map[Coordinate]struct{}
+
+func (cs *CoordinateSet) Add(c Coordinate) {
+	(*cs)[c] = struct{}{}
+}
+
+func (cs CoordinateSet) Contains(c Coordinate) bool {
+	_, ok := cs[c]
+	return ok
+}
+
+func (cs CoordinateSet) Difference(cs2 CoordinateSet) CoordinateSet {
+	result := CoordinateSet{}
+	for k := range cs {
+		if !cs2.Contains(k) {
+			result.Add(k)
+		}
+	}
+	return result
+}
+
+func (cs CoordinateSet) Union(cs2 CoordinateSet) CoordinateSet {
+	result := CoordinateSet{}
+	for k := range cs {
+		result.Add(k)
+	}
+	for k := range cs2 {
+		result.Add(k)
+	}
+	return result
+}

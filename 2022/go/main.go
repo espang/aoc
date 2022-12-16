@@ -63,7 +63,7 @@ func main() {
 	case "day14":
 		do("../inputs/input14.txt", day14.Part1, day14.Part2)
 	case "day15":
-		do("../inputs/input15.txt", day15.Part1, day15.Part2)
+		do("../inputs/input15.txt", day15.Part2, day15.Part2)
 	case "day16":
 		do("../inputs/input16.txt", day16.Part1, day16.Part2)
 	default:

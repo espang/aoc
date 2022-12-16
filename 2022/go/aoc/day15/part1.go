@@ -1,94 +1,65 @@
 package day15
 
 import (
-	"container/list"
 	"fmt"
+	"math"
+	"sort"
 	"strings"
 )
 
-type CoordinateSet map[Coordinate]struct{}
-
-func (cs *CoordinateSet) Add(c Coordinate) {
-	(*cs)[c] = struct{}{}
-}
-
-func (cs CoordinateSet) Contains(c Coordinate) bool {
-	_, ok := cs[c]
-	return ok
-}
-
-func (cs CoordinateSet) Difference(cs2 CoordinateSet) CoordinateSet {
-	result := CoordinateSet{}
-	for k := range cs {
-		if !cs2.Contains(k) {
-			result.Add(k)
-		}
-	}
-	return result
-}
-
-func (cs CoordinateSet) Union(cs2 CoordinateSet) CoordinateSet {
-	result := CoordinateSet{}
-	for k := range cs {
-		result.Add(k)
-	}
-	for k := range cs2 {
-		result.Add(k)
-	}
-	return result
-}
-
-// given a sensor and a beacon, returns all points that
-// can't have a beacon
-func handleSensor(sensor Coordinate, y, maxDinstance int) CoordinateSet {
-	directions := []Coordinate{{-1, 0}, {1, 0}}
-	result := CoordinateSet{}
-	queue := list.New()
-	start := Coordinate{X: sensor.X, Y: y}
-	if distance(sensor, start) > maxDinstance {
-		return result
-	}
-	queue.PushBack(start)
-	result.Add(start)
-
-	for queue.Len() > 0 {
-		current := queue.Remove(queue.Front()).(Coordinate)
-		for _, dir := range directions {
-			newPos := Add(current, dir)
-			if result.Contains(newPos) {
-				continue
-			}
-
-			if distance(sensor, newPos) <= maxDinstance {
-				result.Add(newPos)
-				queue.PushBack(newPos)
-			}
-		}
-	}
-	return result
+type Sensor struct {
+	Pos      Coordinate
+	Distance int
 }
 
 func Part1(input string) {
-	y := 2000000
-
-	allSensors := CoordinateSet{}
-	allBeacons := CoordinateSet{}
-	allFree := CoordinateSet{}
+	y := 2_000_000
+	sensors := []Sensor{}
+	minX := math.MaxInt
+	maxX := math.MinInt
+	beacondsAndSensors := CoordinateSet{}
 	for _, line := range strings.Split(input, "\n") {
 		sensor, beacon := parseLine(line)
-		allBeacons.Add(beacon)
-		allSensors.Add(sensor)
-		free := handleSensor(sensor, y, distance(sensor, beacon))
-		allFree = allFree.Union(free)
-	}
-	total := 0
-
-	for k := range allFree {
-		if allBeacons.Contains(k) || allSensors.Contains(k) {
+		dist := distance(sensor, beacon)
+		distFromY := abs(sensor.Y - y)
+		if distFromY > dist {
+			// sensor is far away from wanted y so we don't care about them
 			continue
 		}
-		if k.Y == y {
-			total++
+		sensors = append(sensors, Sensor{Pos: sensor, Distance: dist})
+		if x := sensor.X - dist; x < minX {
+			minX = x
+		}
+		if x := sensor.X + dist; x > maxX {
+			maxX = x
+		}
+		beacondsAndSensors.Add(sensor)
+		beacondsAndSensors.Add(beacon)
+	}
+	sort.Slice(sensors, func(i, j int) bool {
+		di := sensors[i].Distance - abs(sensors[i].Pos.Y-y)
+		dj := sensors[j].Distance - abs(sensors[j].Pos.Y-y)
+
+		return sensors[i].Pos.X-di < sensors[j].Pos.X-dj
+	})
+
+	start := 0
+	total := 0
+	c := Coordinate{X: 0, Y: y}
+outer:
+	for x := minX; x <= maxX; x++ {
+		c.X = x
+		if beacondsAndSensors.Contains(c) {
+			continue
+		}
+		for i := start; i < len(sensors); i++ {
+			dist := distance(sensors[i].Pos, c)
+			if dist <= sensors[i].Distance {
+				total++
+				continue outer
+			}
+			// over the sensor, stop checking it
+			start = i
 		}
 	}
 	fmt.Println(total)
