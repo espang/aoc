@@ -11,10 +11,6 @@ type Resources struct {
 	Geode    uint8
 }
 
-func (r Resources) FingerPrint() uint64 {
-	return uint64(r.Ore) | uint64(r.Clay)<<8 | uint64(r.Obsidian)<<16 | uint64(r.Geode)<<24
-}
-
 func (r1 Resources) LessOrEqual(r2 Resources) bool {
 	return r1.Ore <= r2.Ore && r1.Clay <= r2.Clay && r1.Obsidian <= r2.Obsidian && r1.Geode <= r2.Geode
 }
@@ -24,10 +20,6 @@ type Robots struct {
 	Clay     uint8
 	Obsidian uint8
 	Geode    uint8
-}
-
-func (r Robots) FingerPrint() uint64 {
-	return uint64(r.Ore) | uint64(r.Clay)<<8 | uint64(r.Obsidian)<<16 | uint64(r.Geode)<<24
 }
 
 func (r1 Robots) LessOrEqual(r2 Robots) bool {
@@ -53,10 +45,6 @@ type Factory struct {
 	MaxRobots Robots
 	Robots    Robots
 	Resources Resources
-}
-
-func (f Factory) FingerPrint() uint64 {
-	return f.Robots.FingerPrint() | f.Resources.FingerPrint()<<32
 }
 
 func (f Factory) BuildableOptions(bluePrint BluePrint) []Robot {
@@ -104,13 +92,6 @@ func (f *Factory) Build(robot Robot, bluePrint BluePrint) {
 	}
 }
 
-// //     robots  - resources
-//
-//	0: 1 0 0 0 - 0 0 0 0
-//	1: 1 0 0 0 - 1 0 0 0
-//	2: 1 0 0 0 - 2 0 0 0
-//	3: 1 1 0 0 - 1 0 0 0 | 1 0 0 0 - 3 0 0 0
-//	4: 1 1 0 0 - 2 1 0 0 | 1 1 0 0 - 2 0 0 0 | 1 0 0 0 - 4 0 0 0 (discard bad options: same robots, all resources <= )
 func maximumGeodeAfter(minutes int, bluePrint BluePrint) uint8 {
 	var maxGeode uint8
 	startingFactory := Factory{
@@ -121,8 +102,6 @@ func maximumGeodeAfter(minutes int, bluePrint BluePrint) uint8 {
 		Robots: Robots{Ore: 1}}
 	currentFactories := []Factory{startingFactory}
 	for minute := 1; minute <= minutes; minute++ {
-		// fmt.Println("handle minute: ", minute)
-		// fmt.Println("\t", len(currentFactories))
 		nextFactories := []Factory{}
 		resourcesRobots := map[Robots]Resources{}
 		for _, current := range currentFactories {
