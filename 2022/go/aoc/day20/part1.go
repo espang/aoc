@@ -6,14 +6,9 @@ import (
 
 func Mix(nodes []*Node) {
 	for _, n := range nodes {
-		// optimization for part2:
-		times := n.value % (len(nodes) - 1)
-		for i := 0; i < times; i++ {
-			SwapForwad(n)
-		}
-		for i := 0; i > times; i-- {
-			SwapBackward(n)
-		}
+		movement := n.value % (len(nodes) - 1)
+		positionToMoveTo := Move(movement, n)
+		MoveAfter(n, positionToMoveTo)
 	}
 }
 
@@ -34,5 +29,6 @@ func Part1(input string) {
 	ring := MakeRing(numbers)
 	nodes := AllNodes(ring)
 	Mix(nodes)
+	// PrintAll(nodes[0])
 	fmt.Println(SumOfGroove(ring))
 }

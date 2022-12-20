@@ -18,6 +18,33 @@ func Append(to *Node, value int) *Node {
 	return newNode
 }
 
+func MoveAfter(toMove *Node, pos *Node) {
+	if toMove.prev == pos || toMove == pos {
+		return
+	}
+
+	if toMove.next == pos {
+		SwapForwad(toMove)
+		return
+	}
+
+	prev := toMove.prev
+	next := toMove.next
+
+	toMove.next = pos.next
+	toMove.prev = pos
+
+	pos.next.prev = toMove
+	pos.next = toMove
+
+	next.prev = prev
+	prev.next = next
+}
+
+func MoveBefore(toMove *Node, pos *Node) {
+	MoveAfter(toMove, pos.prev)
+}
+
 func SwapForwad(n *Node) {
 	nextNode := n.next
 	prevNode := n.prev
@@ -28,17 +55,6 @@ func SwapForwad(n *Node) {
 	nextNode.next = n
 	nextNode.prev = prevNode
 	prevNode.next = nextNode
-}
-
-func SwapBackward(n *Node) {
-	nextNode := n.next
-	prevNode := n.prev
-	n.prev = prevNode.prev
-	n.next = prevNode
-	prevNode.prev.next = n
-	prevNode.prev = n
-	prevNode.next = nextNode
-	nextNode.prev = prevNode
 }
 
 func PrintAll(n *Node) {
@@ -87,4 +103,15 @@ func FindNodeByValue(head *Node, val int) *Node {
 		}
 	}
 	return nil
+}
+
+func Move(amount int, head *Node) *Node {
+	current := head
+	for i := 0; i < amount; i++ {
+		current = current.next
+	}
+	for i := 0; i >= amount; i-- {
+		current = current.prev
+	}
+	return current
 }
