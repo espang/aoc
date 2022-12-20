@@ -12,6 +12,7 @@ import (
 	"aoc/aoc/day17"
 	"aoc/aoc/day18"
 	"aoc/aoc/day19"
+	"aoc/aoc/day20"
 	"aoc/aoc/day9"
 	"fmt"
 	"os"
@@ -75,6 +76,8 @@ func main() {
 		do("../inputs/input18.txt", day18.Part1, day18.Part2)
 	case "day19":
 		do("../inputs/input19.txt", day19.Part1, day19.Part2)
+	case "day20":
+		do("../inputs/input20.txt", day20.Part1, day20.Part2)
 	default:
 		fmt.Printf("no solution for %q\n", day)
 		os.Exit(1)

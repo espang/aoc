@@ -10,7 +10,7 @@ import (
 func sumOfGroups(groups [][]int) []int {
 	// poc; that is less readable than the for loop...
 	f := func(acc []int, val []int) []int {
-		return append(acc, sum(val))
+		return append(acc, Sum(val))
 	}
 	return reduce(f, []int{}, groups)
 }
