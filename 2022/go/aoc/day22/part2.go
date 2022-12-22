@@ -134,14 +134,7 @@ func ExecuteInstructions2(instructions []any, grid Grid, folds map[State]State) 
 		switch val := instruction.(type) {
 		case Move:
 			for i := 0; i < int(val); i++ {
-				nextRow, nextCol, nextOrientation := grid.HandleCube(row, col, orientation, folds)
-				if nextRow == row && nextCol == col {
-					// no move, wall
-					break
-				}
-				row = nextRow
-				col = nextCol
-				orientation = nextOrientation
+				row, col, orientation = grid.MoveOnCube(row, col, orientation, folds)
 			}
 		case Rotate:
 			orientation = orientation.Rotate(val)

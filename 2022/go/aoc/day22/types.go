@@ -95,7 +95,7 @@ func (g Grid) Handle(m Move, row, col int, orientation Orientation) (int, int) {
 	return row, col
 }
 
-func (g Grid) HandleCube(row, col int, orientation Orientation, jumps map[State]State) (int, int, Orientation) {
+func (g Grid) MoveOnCube(row, col int, orientation Orientation, jumps map[State]State) (int, int, Orientation) {
 	nextRow, nextCol := row, col
 	switch orientation {
 	case Left:
@@ -122,7 +122,7 @@ func (g Grid) HandleCube(row, col int, orientation Orientation, jumps map[State]
 	case Wall:
 		return row, col, orientation
 	}
-	panic("unreachable handle cube")
+	panic("unreachable code")
 }
 
 type Cube struct {
