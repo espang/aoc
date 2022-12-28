@@ -131,7 +131,6 @@ func show(elves aoc.Set[Coord]) {
 }
 
 func Part1(input string) {
-	// input = testinput
 	coords := Parse(input)
 	s := aoc.Set[Coord]{}
 	for _, c := range coords {
@@ -144,20 +143,4 @@ func Part1(input string) {
 
 	positions := (max.x - min.x + 1) * (max.y - min.y + 1)
 	fmt.Println(positions - len(s))
-}
-
-func Part2(input string) {
-	coords := Parse(input)
-	s := aoc.Set[Coord]{}
-	for _, c := range coords {
-		s.Add(c)
-	}
-	var elvesMoved int
-	for turn := 0; ; turn++ {
-		s, elvesMoved = step(turn, s)
-		if elvesMoved == 0 {
-			fmt.Println(turn + 1)
-			return
-		}
-	}
 }
