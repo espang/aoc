@@ -1,9 +1,10 @@
 package day23
 
 import (
-	"aoc/aoc"
 	"fmt"
 	"math"
+
+	"github.com/espang/aoc/y2022/go/aoc"
 )
 
 type Direction int

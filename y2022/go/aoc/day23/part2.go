@@ -1,8 +1,9 @@
 package day23
 
 import (
-	"aoc/aoc"
 	"fmt"
+
+	"github.com/espang/aoc/y2022/go/aoc"
 )
 
 func Part2(input string) {

@@ -1,8 +1,9 @@
 package day24
 
 import (
-	"aoc/aoc"
 	"fmt"
+
+	"github.com/espang/aoc/y2022/go/aoc"
 )
 
 type Position struct {
