@@ -1,4 +1,4 @@
-package aoc
+package day1
 
 import (
 	"fmt"
@@ -50,12 +50,12 @@ func inputToCaloriesByElf(input string) []int {
 	return sumOfGroups(groups)
 }
 
-func Day1Part1(input string) {
+func Part1(input string) {
 	caloriesCarried := inputToCaloriesByElf(input)
 	fmt.Print(mustMaxOf(caloriesCarried))
 }
 
-func Day1Part2(input string) {
+func Part2(input string) {
 	caloriesCarried := inputToCaloriesByElf(input)
 	sort.Sort(sort.Reverse(sort.IntSlice(caloriesCarried)))
 	val := caloriesCarried[0] + caloriesCarried[1] + caloriesCarried[2]

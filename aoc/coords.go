@@ -1,5 +1,7 @@
 package aoc
 
+type MoveFn func(Coordinate) Coordinate
+
 type Coordinate struct {
 	X, Y int
 }

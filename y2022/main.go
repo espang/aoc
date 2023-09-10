@@ -7,6 +7,7 @@ import (
 
 	"github.com/espang/aoc/aoc"
 	alt_aoc "github.com/espang/aoc/y2022/go/aoc"
+	"github.com/espang/aoc/y2022/go/aoc/day1"
 	"github.com/espang/aoc/y2022/go/aoc/day10"
 	"github.com/espang/aoc/y2022/go/aoc/day11"
 	"github.com/espang/aoc/y2022/go/aoc/day12"
@@ -57,7 +58,8 @@ func main() {
 	day := os.Args[1]
 	switch day {
 	case "day1":
-		do(aoc.MustMakeInputAvailable(context.TODO(), 2022, 1), alt_aoc.Day1Part1, alt_aoc.Day1Part2)
+		fname := aoc.MustMakeInputAvailable(context.TODO(), 2022, 1)
+		do(fname, day1.Part1, day1.Part2)
 	case "day7":
 		do(aoc.MustMakeInputAvailable(context.TODO(), 2022, 7), alt_aoc.Day7Part1, alt_aoc.Day7Part2)
 	case "day8":

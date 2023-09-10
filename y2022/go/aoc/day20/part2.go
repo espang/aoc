@@ -3,7 +3,7 @@ package day20
 import (
 	"fmt"
 
-	"github.com/espang/aoc/y2022/go/aoc"
+	"github.com/espang/aoc/aoc"
 )
 
 func Part2(input string) {

@@ -8,6 +8,7 @@ import (
 
 	"github.com/espang/aoc/y2016/day1"
 	"github.com/espang/aoc/y2016/day17"
+	"github.com/espang/aoc/y2016/day24"
 )
 
 func main() {
@@ -27,6 +28,9 @@ func main() {
 	case "day17":
 		part1 = day17.Part1
 		part2 = day17.Part2
+	case "day24":
+		part1 = day24.Part1
+		part2 = day24.Part2
 	default:
 		slog.Warn("couldn't find solution for the given day, expect this format `dayN` for day N and N can be any number between 1 and 25", slog.String("day-value", day))
 		os.Exit(1)

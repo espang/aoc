@@ -3,7 +3,7 @@ package day25
 import (
 	"fmt"
 
-	"github.com/espang/aoc/y2022/go/aoc"
+	"github.com/espang/aoc/aoc"
 )
 
 func pow(base, exponent int) int {
@@ -85,7 +85,7 @@ func ToSnafu(i int) string {
 
 func Part1(input string) {
 	numbers := Parse(input)
-	number := aoc.Sum(aoc.Map(FromSnafu, numbers))
+	number := aoc.SliceSum(aoc.Map(FromSnafu, numbers))
 	fmt.Println(ToSnafu(number))
 
 }

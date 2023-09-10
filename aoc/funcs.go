@@ -1,5 +1,17 @@
 package aoc
 
+type Number interface {
+	~int | ~float64
+}
+
+func SliceSum[N Number](vs []N) N {
+	var total N
+	for _, v := range vs {
+		total += v
+	}
+	return total
+}
+
 func SliceMap[K, V any](ks []K, f func(K) V) []V {
 	if len(ks) == 0 {
 		return nil
@@ -9,6 +21,30 @@ func SliceMap[K, V any](ks []K, f func(K) V) []V {
 		vs = append(vs, f(k))
 	}
 	return vs
+}
+
+func Map[A any, B any](f func(input A) B, vs []A) []B {
+	ret := make([]B, 0, len(vs))
+	for _, v := range vs {
+		ret = append(ret, f(v))
+	}
+	return ret
+}
+
+func MapTranspose[K, V comparable](m map[K]V) map[V]K {
+	result := map[V]K{}
+	for k, v := range m {
+		result[v] = k
+	}
+	return result
+}
+
+func MapValues[K comparable, V any](m map[K]V) []V {
+	result := make([]V, 0, len(m))
+	for _, v := range m {
+		result = append(result, v)
+	}
+	return result
 }
 
 func abs(x int) int {
@@ -24,21 +60,4 @@ func Do(n int, f func()) {
 	for i := 0; i < n; i++ {
 		f()
 	}
-}
-
-type Set[V comparable] map[V]struct{}
-
-func NewSet[V comparable]() *Set[V] {
-	m := map[V]struct{}{}
-	s := Set[V](m)
-	return &s
-}
-
-func (s *Set[V]) Add(v V) {
-	(*s)[v] = struct{}{}
-}
-
-func (s *Set[V]) Contains(v V) bool {
-	_, ok := (*s)[v]
-	return ok
 }

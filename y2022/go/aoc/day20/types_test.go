@@ -3,7 +3,7 @@ package day20
 import (
 	"testing"
 
-	"github.com/espang/aoc/y2022/go/aoc"
+	"github.com/espang/aoc/aoc"
 	"github.com/stretchr/testify/assert"
 )
 
