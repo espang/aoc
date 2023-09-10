@@ -33,7 +33,6 @@ func main() {
 	}
 
 	start := time.Now()
-	slog.Info("start part1")
 	result, err := part1()
 	if err != nil {
 		slog.Warn("failed to handle part1", slog.String("day", day), slog.Any("error", err))
