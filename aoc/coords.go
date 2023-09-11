@@ -6,6 +6,13 @@ type Coordinate struct {
 	X, Y int
 }
 
+func (c Coordinate) Plus(c2 Coordinate) Coordinate {
+	return Coordinate{
+		X: c.X + c2.X,
+		Y: c.Y + c2.Y,
+	}
+}
+
 func (c Coordinate) Equal(c2 Coordinate) bool {
 	return c.X == c2.X && c.Y == c2.Y
 }

@@ -6,11 +6,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/espang/aoc/y2016/day1"
-	"github.com/espang/aoc/y2016/day17"
-	"github.com/espang/aoc/y2016/day22"
-	"github.com/espang/aoc/y2016/day24"
-	"github.com/espang/aoc/y2016/day25"
+	"github.com/espang/aoc/y2017/day21"
 )
 
 func main() {
@@ -24,21 +20,9 @@ func main() {
 	var part1 func() (string, error)
 	var part2 func() (string, error)
 	switch day {
-	case "day1":
-		part1 = day1.Part1
-		part2 = day1.Part2
-	case "day17":
-		part1 = day17.Part1
-		part2 = day17.Part2
-	case "day22":
-		part1 = day22.Part1
-		part2 = day22.Part2
-	case "day24":
-		part1 = day24.Part1
-		part2 = day24.Part2
-	case "day25":
-		part1 = day25.Part1
-		part2 = day25.Part2
+	case "day21":
+		part1 = day21.Part1
+		part2 = day21.Part2
 	default:
 		slog.Warn("couldn't find solution for the given day, expect this format `dayN` for day N and N can be any number between 1 and 25", slog.String("day-value", day))
 		os.Exit(1)

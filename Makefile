@@ -1,12 +1,17 @@
 -include .env
 export AOC_ROOT_FOLDER = $(shell pwd)
 
-.PHONY: y2016 y2022 help test
+.PHONY: y2016 y2017 y2022 help test
 .DEFAULT_GOAL := help
 
 ## runs the year 2016 go solution. Select the day by setting the `AOC_DAY` env var, e.g. `AOC_DAY=day1 make y2016`
 y2016:
 	go run y2016/main.go ${AOC_DAY}
+
+## runs the year 2016 go solution. Select the day by setting the `AOC_DAY` env var, e.g. `AOC_DAY=day1 make y2017`
+y2017:
+	go run y2017/main.go ${AOC_DAY}
+
 
 ## runs the year 2022 go solution. Select the day by setting the `AOC_DAY` env var.
 y2022:
