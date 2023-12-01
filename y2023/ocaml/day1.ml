@@ -15,21 +15,20 @@ let last_digit r l =
   let found = Str.matched_string l in
   int_of_string (conversion found)
 
-let handle_line r l =
-  let first = first_digit r l in
-  let last = last_digit r l in
-  first * 10 + last
+let handle_line r l = (first_digit r l) * 10 + (last_digit r l)
+
+let sum vs = List.fold_left (fun s v -> s + v) 0 vs
 
 let part1 content = 
   let r = Str.regexp {|\([0-9]\)|} in
   String.split_on_char '\n' content
   |> List.map (handle_line r)
-  |> List.fold_left (fun acc v -> acc + v) 0
+  |> sum
   |> Printf.printf "%d"
 
 let part2 content =
   let r = Str.regexp {|\(one\|two\|three\|four\|five\|six\|seven\|eight\|nine\|[0-9]\)|} in
   String.split_on_char '\n' content
   |> List.map (handle_line r)
-  |> List.fold_left (fun acc v -> acc + v) 0
+  |> sum
   |> Printf.printf "%d"
