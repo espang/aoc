@@ -14,6 +14,8 @@ let solve day =
   let (filename, part1, part2) = match day with
     | "day1" -> 
       ("../../inputs/2023_1.txt", Day1.part1, Day1.part2)
+    | "day2" ->
+      ("../../inputs/2023_2.txt", Day2.part1, Day2.part2)
     | _ -> failwith "unexpected day"
   in
   let input = read_whole_file filename in
