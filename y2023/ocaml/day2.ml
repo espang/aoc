@@ -79,11 +79,10 @@ let score_line_2 l =
     List.map sets ~f:(value_for color)
     |> List.max_elt ~compare
     |> Option.value_exn)
-    |> List.fold ~init:1 ~f:( * )
+  |> List.fold ~init:1 ~f:( * )
 
 let part2 content =
   String.split_lines content
   |> List.map ~f:score_line_2
   |> List.fold ~init:0 ~f:(+)
   |> Printf.printf "%d"
-
