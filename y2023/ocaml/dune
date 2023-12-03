@@ -1,4 +1,4 @@
 (executable
  (name main)
- (modules main day1 day2)
+ (modules main day1 day2 day3)
  (libraries str core))
