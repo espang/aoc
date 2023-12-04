@@ -18,6 +18,8 @@ let solve day =
       ("../../inputs/2023_2.txt", Day2.part1, Day2.part2)
     | "day3" ->
       ("../../inputs/2023_3.txt", Day3.part1, Day3.part2)
+    | "day4" ->
+      ("../../inputs/2023_4.txt", Day4.part1, Day4.part2)
     | _ -> failwith "unexpected day"
   in
   let input = read_whole_file filename in
