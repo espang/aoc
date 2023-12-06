@@ -95,3 +95,8 @@
   (time (apply min-key second (part1 content)))
   ;; (time (part2 test-input))
   (time (part2 content)))
+
+(convert-map
+ (parse-map "seed-to-soil map:
+50 98 2
+52 50 48"))
