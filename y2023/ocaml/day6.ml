@@ -11,7 +11,8 @@ type race =
     let total_winnings fst =
       (* the distances we can reach is symmetric
          so if the first winning option is on index
-         n from the start is also on index -n form the
+         n from the start the last winning option is
+        also on index time-n form the
         end.*)
       let number_of_options = time + 1 in
       number_of_options - 2 * fst
@@ -36,4 +37,3 @@ let part2 _ =
   {time=54946592; distance=302147610291404}
   |> number_of_ways_to_win
   |> Printf.printf "%d\n"
-
