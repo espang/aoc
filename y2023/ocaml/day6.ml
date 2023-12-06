@@ -4,23 +4,23 @@ type race =
   { time: int;
     distance: int;
   }
-  let number_of_ways_to_win {time; distance} =
-    let hold_time_to_distance ht =
-      ht * (time - ht)
-    in
-    let total_winnings fst =
-      (* the distances we can reach is symmetric
-         so if the first winning option is on index
-         n from the start the last winning option is
-        also on index time-n form the
-        end.*)
-      let number_of_options = time + 1 in
-      number_of_options - 2 * fst
-    in
-    match Seq.init time (fun x -> x)
-      |> Seq.find (fun t -> (hold_time_to_distance t) > distance) with
-    | Some first_win -> total_winnings first_win
-    | None -> 0
+let number_of_ways_to_win {time; distance} =
+  let hold_time_to_distance ht =
+    ht * (time - ht)
+  in
+  let total_winnings fst =
+    (* the distances we can reach is symmetric
+        so if the first winning option is on index
+        n from the start the last winning option is
+      also on index time-n form the
+      end.*)
+    let number_of_options = time + 1 in
+    number_of_options - 2 * fst
+  in
+  match Seq.init time (fun x -> x)
+    |> Seq.find (fun t -> (hold_time_to_distance t) > distance) with
+  | Some first_win -> total_winnings first_win
+  | None -> 0
   
 let part1 _ =
   [
