@@ -5,7 +5,6 @@ let must_split_into_two s on =
   | [fst; snd] -> (fst, snd)
   | _ -> failwith "could not split into two"
 
-
 type handType = FiveOfAKind | FourOfAKind | FullHouse | ThreeOfAKind | TwoPair | OnePair | HighCard
 
 type hand =
@@ -23,21 +22,21 @@ let card_to_number joker_value = function
   | '6' -> 5  | '5' -> 4  | '4' -> 3  | '3' -> 2
   | '2' -> 1 | _ -> failwith "unexpected card"
 
-let compare_cards card_to_number cards1 cards2 =
-  let compare_card card_to_number c1 c2 = 
-    compare (card_to_number c1) (card_to_number c2)
-  in  
-  let rec aux cs1 = function
-    | [] -> if List.is_empty cs1 then 0 else 1
-    | hd2::tl2 -> match cs1 with
-      | [] -> -1
-      | hd1::tl1 -> match compare_card card_to_number hd1 hd2 with
-        | 0 -> aux tl1 tl2
-        | v -> v
-  in
-  aux (String.to_list cards1) (String.to_list cards2)
-
 let compare_hands card_to_number hand1 hand2 =
+  let compare_cards card_to_number cards1 cards2 =
+    let compare_card card_to_number c1 c2 = 
+      compare (card_to_number c1) (card_to_number c2)
+    in  
+    let rec aux cs1 = function
+      | [] -> if List.is_empty cs1 then 0 else 1
+      | hd2::tl2 -> match cs1 with
+        | [] -> -1
+        | hd1::tl1 -> match compare_card card_to_number hd1 hd2 with
+          | 0 -> aux tl1 tl2
+          | v -> v
+    in
+    aux (String.to_list cards1) (String.to_list cards2)
+  in
   let compare_hand_type ht1 ht2 = 
     compare (handType_to_number ht1) (handType_to_number ht2)
   in
@@ -76,23 +75,12 @@ let rank_hands card_to_number lst =
   in
   List.sort lst ~compare:compare_fn
 
-let frequencies2 hand =
-  let update_frequency_counter = function
-    | None -> 1
-    | Some n -> n + 1
-  in
+let frequencies_with_jokers hand =
   let jokers = String.count hand ~f:(phys_equal 'J') in
-  let add_jokers = function
-    | hd::tl -> (hd + jokers) :: tl
-    | [] -> [jokers]
-  in
-  let m = Map.empty (module Char) in
-  String.filter hand ~f:(fun c -> not (phys_equal c 'J'))
-  |> String.fold ~init:m ~f:(Map.update ~f:update_frequency_counter)
-  |> Map.data
-  |> List.sort ~compare:Int.descending
-  |> add_jokers
-
+  match frequencies (String.filter hand ~f:(fun c -> not (phys_equal c 'J'))) with
+  | hd::tl -> (hd + jokers) :: tl
+  | [] -> [jokers]
+  
 let count_winnings content joker_value freq =
   String.split_lines content
   |> List.map ~f:(parse_line (make_hand freq))
@@ -100,4 +88,4 @@ let count_winnings content joker_value freq =
   |> List.foldi ~init:0 ~f:(fun rank acc (_, bid) -> acc + (rank + 1) * bid)
 
 let part1 content = Printf.printf "%d\n" (count_winnings content 10 frequencies)
-let part2 content = Printf.printf "%d\n" (count_winnings content 0 frequencies2)
+let part2 content = Printf.printf "%d\n" (count_winnings content 0 frequencies_with_jokers)
