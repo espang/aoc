@@ -76,8 +76,9 @@ let rank_hands card_to_number lst =
   List.sort lst ~compare:compare_fn
 
 let frequencies_with_jokers hand =
-  let jokers = String.count hand ~f:(phys_equal 'J') in
-  match frequencies (String.filter hand ~f:(fun c -> not (phys_equal c 'J'))) with
+  let without_jokers = String.filter hand ~f:(fun c -> not (phys_equal c 'J')) in
+  let jokers = (5 - String.length without_jokers) in
+  match frequencies without_jokers with
   | hd::tl -> (hd + jokers) :: tl
   | [] -> [jokers]
   
