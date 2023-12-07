@@ -7,41 +7,38 @@ let must_split_into_two s on =
 
 type handType = FiveOfAKind | FourOfAKind | FullHouse | ThreeOfAKind | TwoPair | OnePair | HighCard
 
-type hand =
-  { cards: string;
-    handType: handType;
-  }
-
 let handType_to_number = function
   | FiveOfAKind -> 7 | FourOfAKind -> 6 | FullHouse -> 5 | ThreeOfAKind -> 4
   | TwoPair     -> 3 | OnePair     -> 2 | HighCard  -> 1
 
 let card_to_number joker_value = function
-  | 'A' -> 13 | 'K' -> 12 | 'Q' -> 11 | 'J' -> joker_value
-  | 'T' -> 9  | '9' -> 8  | '8' -> 7  | '7' -> 6
-  | '6' -> 5  | '5' -> 4  | '4' -> 3  | '3' -> 2
-  | '2' -> 1 | _ -> failwith "unexpected card"
+  | 'A' -> 13 | 'K' -> 12 | 'Q' -> 11 | 'T' -> 9 | '9' -> 8 | '8' -> 7
+  | '7' -> 6  | '6' -> 5  | '5' -> 4  | '4' -> 3 | '3' -> 2 | '2' -> 1  
+  | 'J' -> joker_value | _ -> failwith "unexpected card"
 
-let compare_hands card_to_number hand1 hand2 =
-  let compare_cards card_to_number cards1 cards2 =
-    let compare_card card_to_number c1 c2 = 
-      compare (card_to_number c1) (card_to_number c2)
-    in  
-    let rec aux cs1 = function
-      | [] -> if List.is_empty cs1 then 0 else 1
-      | hd2::tl2 -> match cs1 with
-        | [] -> -1
-        | hd1::tl1 -> match compare_card card_to_number hd1 hd2 with
-          | 0 -> aux tl1 tl2
-          | v -> v
+let highest_card joker_value cards1 cards2 =
+  let card_to_number' = card_to_number joker_value in
+  let compare_card c1 c2 =  compare (card_to_number' c1) (card_to_number' c2) in
+  let compare_cards cards1 cards2 =
+    let rec aux = function
+      | [], [] -> 0
+      | [], _  -> -1
+      | _, []  -> 1
+      | (v1::cs1), (v2::cs2) ->
+        match compare_card v1 v2 with
+        | 0 -> aux (cs1, cs2)
+        | v -> v
     in
-    aux (String.to_list cards1) (String.to_list cards2)
+    aux ((String.to_list cards1), (String.to_list cards2))
   in
+  compare_cards cards1 cards2
+
+let compare_hands joker_value (cs1, ht1) (cs2, ht2) =
   let compare_hand_type ht1 ht2 = 
     compare (handType_to_number ht1) (handType_to_number ht2)
   in
-  match compare_hand_type hand1.handType hand2.handType with
-  | 0 -> compare_cards card_to_number hand1.cards hand2.cards
+  match compare_hand_type ht1 ht2 with
+  | 0 -> highest_card joker_value cs1 cs2
   | v -> v
 
 let frequencies hand =
@@ -54,24 +51,19 @@ let frequencies hand =
   |> Map.data
   |> List.sort ~compare:Int.descending
 
-let make_hand frequencies s =
-  match frequencies s with
-  | [5]         -> {cards=s; handType=FiveOfAKind}
-  | [4;1]       -> {cards=s; handType=FourOfAKind}
-  | [3;2]       -> {cards=s; handType=FullHouse}
-  | [3;1;1]     -> {cards=s; handType=ThreeOfAKind}
-  | [2;2;1]     -> {cards=s; handType=TwoPair}
-  | [2;1;1;1]   -> {cards=s; handType=OnePair}
-  | [1;1;1;1;1] -> {cards=s; handType=HighCard}
-  | _ -> failwith (Printf.sprintf "unexpected hand: '%s'" s)
+let hand_type_from_freqs = function 
+  | [5] -> FiveOfAKind | [4;1] -> FourOfAKind | [3;2] -> FullHouse
+  | [3;1;1] -> ThreeOfAKind | [2;2;1] -> TwoPair | [2;1;1;1] -> OnePair
+  | [1;1;1;1;1] -> HighCard
+  | _ -> failwith "unexpected hand"
 
-let parse_line make_hand l =
+let parse_line freqs l =
   let (cards, bid) = must_split_into_two l ' ' in
-  (make_hand cards, int_of_string bid)
+  ((cards, hand_type_from_freqs (freqs cards)), int_of_string bid)
 
-let rank_hands card_to_number lst =
+let rank_hands joker_value lst =
   let compare_fn (h1, _) (h2, _) =
-    compare_hands card_to_number h1 h2
+    compare_hands joker_value h1 h2
   in
   List.sort lst ~compare:compare_fn
 
@@ -84,8 +76,8 @@ let frequencies_with_jokers hand =
   
 let count_winnings content joker_value freq =
   String.split_lines content
-  |> List.map ~f:(parse_line (make_hand freq))
-  |> (rank_hands (card_to_number joker_value))
+  |> List.map ~f:(parse_line freq)
+  |> (rank_hands joker_value)
   |> List.foldi ~init:0 ~f:(fun rank acc (_, bid) -> acc + (rank + 1) * bid)
 
 let part1 content = Printf.printf "%d\n" (count_winnings content 10 frequencies)
