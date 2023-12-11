@@ -1,4 +1,5 @@
 open Core
+let range i = List.init i ~f:(fun x -> x)
 
 type direction = North | South | West | East
 
@@ -32,7 +33,6 @@ module Board = struct
     { matrix: pipe array array
     ; dimx: int
     ; dimy: int}
-
   let make ~dimx ~dimy =
     { matrix=Array.make_matrix ~dimx ~dimy Ground
     ; dimx=dimx
@@ -123,19 +123,19 @@ module Board3x3 = struct
   { matrix: cell array array
   ; dimx: int
   ; dimy: int}
-
   let make (board:Board.t) path =
     let dimx = 3 * board.dimx in
     let dimy = 3 * board.dimy in
     let board_3x3 = Array.make_matrix ~dimx ~dimy Free in
-    Array.iteri board.matrix ~f:(fun x row ->
-      Array.iteri row ~f:(fun y cell ->
+    List.cartesian_product (range board.dimx) (range board.dimy)
+    |> List.iter ~f:(fun (x, y) ->
         if List.exists path ~f:(fun (x2, y2) -> x = x2 && y = y2)
-      then
-        let blocked_coords = blocked_cells_of_pipe cell in
-        List.iter blocked_coords ~f:(fun (dx, dy) ->
-          board_3x3.(x*3+dx).(y*3+dy) <- Blocked);
-      else ()));
+        then
+          let blocked_coords = blocked_cells_of_pipe board.matrix.(x).(y) in
+          List.iter blocked_coords ~f:(fun (dx, dy) ->
+            board_3x3.(x*3+dx).(y*3+dy) <- Blocked);
+        else ()
+      );
     { matrix=board_3x3
     ; dimx=3 * board.dimx
     ; dimy=3 * board.dimy}
@@ -146,7 +146,6 @@ module Board3x3 = struct
       done;
       Printf.printf "\n"
     done
-  
   let on t x y = not (x < 0 || x >= t.dimx || y < 0 || y >= t.dimy)
   let is_free t x y =
     if on t x y
@@ -156,15 +155,9 @@ module Board3x3 = struct
     if on t x y
     then t.matrix.(x).(y) <- Blocked
     else ()
-
   let free_coords t =
-    Array.foldi t.matrix ~init:[] ~f:(fun x lst row ->
-      Array.foldi row ~init:[] ~f:(fun y lst' cell ->
-        match cell with
-        | Free -> (x, y) :: lst'
-        | Blocked -> lst')
-      |> List.append lst)
-    
+    List.cartesian_product (range t.dimx) (range t.dimy)
+    |> List.filter ~f:(fun (x, y) -> is_free t x y)
   let mark_blocked t =
     let queue = Queue.create () in
     Queue.enqueue queue (0, 0);
@@ -191,13 +184,15 @@ let solve_2 board =
   let path = find_start_and_path board in
   let b3x3 = Board3x3.make board path in
   Board3x3.mark_blocked b3x3;
-  (Board3x3.free_coords b3x3
-  |> List.map ~f:(fun (x, y) -> (x / 3, y / 3))
-  |> List.dedup_and_sort ~compare:(fun (x, y) (x2, y2) ->
-      match compare x x2 with
-      | 0 -> compare y y2
-      | v -> v)
-  |> List.length) - (List.length path)
+  let free_cords =
+    (Board3x3.free_coords b3x3
+    |> List.map ~f:(fun (x, y) -> (x / 3, y / 3))
+    |> List.dedup_and_sort ~compare:(fun (x, y) (x2, y2) ->
+        match compare x x2 with
+        | 0 -> compare y y2
+        | v -> v))
+  in    
+  (List.length free_cords) - (List.length path)
 
 let part2 content = 
   parse content
