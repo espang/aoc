@@ -9,7 +9,7 @@ type pipe =
   | In
   | Out
 
-let pipe_to_char = function 
+let char_of_pipe = function 
   | Pipe(North, South) | Pipe(South, North) -> '|'
   | Pipe(North, East)  | Pipe(East, North)  -> 'L'
   | Pipe(North, West)  | Pipe(West, North)  -> 'J'
@@ -20,209 +20,185 @@ let pipe_to_char = function
   | In -> 'I'          | Out -> 'O'
   | _ -> failwith "unexpected pipe"
 
-let char_to_pipe = function 
+let pipe_of_char = function 
   | '|' -> Pipe(North, South)  | 'L' -> Pipe(North, East) 
   | 'J' -> Pipe(North, West)   | '-' -> Pipe(West, East)  
   | '7' -> Pipe(West, South)   | 'F' -> Pipe(South, East)
   | '.' -> Ground      | 'S' -> Start 
   | _ -> failwith "unexecpted char"
 
-let parse (content:string) = 
-  let rows = String.split_lines content in
-  let dimy = List.length rows in
-  let dimx = String.length (List.hd_exn rows) in
-  let arr = Array.make_matrix ~dimx ~dimy Ground in
-  List.iteri rows ~f:(fun y row ->
-    String.iteri row ~f:(fun x c ->
-      arr.(x).(y) <- char_to_pipe c));
-  arr
+module Board = struct
+  type t =
+    { matrix: pipe array array
+    ; dimx: int
+    ; dimy: int}
 
-let show board =
-  let dimx = Array.length board in
-  let dimy = Array.length board.(0) in
-  for y = 0 to dimy-1 do
-    for x = 0 to dimx-1 do
-      Printf.printf "%c" (pipe_to_char board.(x).(y))
-    done;
-    Printf.printf "\n"
-  done
-
-let find_start_exn board =
-  Array.find_mapi_exn board 
+  let make ~dimx ~dimy =
+    { matrix=Array.make_matrix ~dimx ~dimy Ground
+    ; dimx=dimx
+    ; dimy=dimy}
+  let update t x y v = t.matrix.(x).(y) <- v
+  let at t x y = try Some t.matrix.(x).(y) with Invalid_argument _ -> None
+  let target_exn t x y dir =
+    let v = t.matrix.(x).(y) in
+    match v with 
+    | Pipe(start, target) when (phys_equal dir start) -> target
+    | Pipe(target, start) when (phys_equal dir start) -> target
+    | _ -> raise (Invalid_argument "not a pipe")
+  let start t =
+    Array.find_mapi_exn t.matrix 
     ~f:(fun x row ->
       match Array.findi row ~f:(fun _ v -> phys_equal v Start) with
       | Some (y, _) -> Some (x, y)
       | None -> None)
-
-let walk_loop (x, y, direction) board =
-  let move_to x y = function
+  let show t =
+    for y = 0 to t.dimy-1 do
+      for x = 0 to t.dimx-1 do
+        Printf.printf "%c" (char_of_pipe t.matrix.(x).(y))
+      done;
+      Printf.printf "\n"
+    done
+  let path_loop t start_x start_y direction =
+    let move x y = function
     | North -> (x, y-1, South)
     | South -> (x, y+1, North)
     | West  -> (x-1, y, East)
     | East  -> (x+1, y, West)
-  in
-  let direction_to d x y =
-    try 
-      match board.(x).(y) with
-      | Pipe(a, b) when (phys_equal a d) -> Some b
-      | Pipe(b, a) when (phys_equal a d) -> Some b
-      | _ -> None
-    with
-      Invalid_argument _ -> None
-  in
-  let rec aux (x', y', direction) path =
-    match direction_to direction x' y' with
-    | Some direction' ->
-      if x = x' && y = y' && List.length path > 0
-      then Some path
-      else aux (move_to x' y' direction') ((x', y')::path)
-    | None -> None
-  in
-  aux (x, y, direction) []
+    in
+    let rec aux (x, y, dir) path =
+      try
+        let dir' = target_exn t x y dir in
+        if x = start_x && y = start_y && List.length path > 0
+        then Some path
+        else aux (move x y dir') ((x, y)::path)
+      with
+        Invalid_argument _ -> None
+    in
+    aux (start_x, start_y, direction) []
+end
 
-let loop board = 
-  let (start_x, start_y) = find_start_exn board in
+let parse (content:string) = 
+  let rows = String.split_lines content in
+  let dimy = List.length rows in
+  let dimx = String.length (List.hd_exn rows) in
+  let board = Board.make ~dimx ~dimy in
+  List.iteri rows ~f:(fun y row ->
+    String.iteri row ~f:(fun x c ->
+      Board.update board x y (pipe_of_char c)));
+  board
+
+let find_start_and_path board = 
+  let (start_x, start_y) = Board.start board in
   let possible_starts = [
-    (North, South);
-    (South, North);
-    (North, East);
-    (East, North);
-    (North, West);
-    (West, North);
-    (West, East);
-    (East, West);
-    (West, South);
-    (South, West);
-    (South, East);
-    (East, South)
+    (North, South); (South, North); (North, East); (East, North);
+    (North, West); (West, North); (West, East); (East, West);
+    (West, South); (South, West); (South, East); (East, South)
   ] in
   let solve_potential_board (from, towards) =
-    board.(start_x).(start_y) <- Pipe(from, towards);
-    match walk_loop (start_x, start_y, from) board with
-    | Some path -> Some (List.length path / 2)
-    | None -> None
+    Board.update board start_x start_y (Pipe(from, towards));
+    Board.path_loop board start_x start_y from
   in
-  List.find_map possible_starts ~f:solve_potential_board
+  List.find_map_exn possible_starts ~f:solve_potential_board
 
 let part1 content = 
-  parse content
-  |> loop
-  |> Option.value_exn
-  |> Printf.printf "%d\n"
+  let path = find_start_and_path (parse content) in
+  Printf.printf "%d\n" (List.length path / 2)
 
 type cell = Blocked | Free
-
 let cell_to_char = function
   | Blocked -> '#'
   | Free    -> '.'
 
-let transform board path =
-  let dimx = 3 * Array.length board in
-  let dimy = 3 * Array.length board.(0) in
-  let board_3x3 = Array.make_matrix ~dimx ~dimy Free in
-  Array.iteri board ~f:(fun x row ->
-    Array.iteri row ~f:(fun y cell ->
-      if List.exists path ~f:(fun (x2, y2) -> x = x2 && y = y2)
-      then
-        match cell with
-        | Pipe(North, South) ->
-          board_3x3.(x*3+1).(y*3) <- Blocked;
-          board_3x3.(x*3+1).(y*3+1)   <- Blocked;
-          board_3x3.(x*3+1).(y*3+2) <- Blocked
-        | Pipe(North, East) ->
-          board_3x3.(x*3+1).(y*3) <- Blocked;
-          board_3x3.(x*3+1).(y*3+1)   <- Blocked;
-          board_3x3.(x*3+2).(y*3+1) <- Blocked
-        | Pipe(North, West) ->
-          board_3x3.(x*3+1).(y*3) <- Blocked;
-          board_3x3.(x*3+1).(y*3+1)   <- Blocked;
-          board_3x3.(x*3).(y*3+1) <- Blocked
-        | Pipe(West, East) ->
-          board_3x3.(x*3).(y*3+1) <- Blocked;
-          board_3x3.(x*3+1).(y*3+1)   <- Blocked;
-          board_3x3.(x*3+2).(y*3+1) <- Blocked
-        | Pipe(West, South) ->
-          board_3x3.(x*3).(y*3+1) <- Blocked;
-          board_3x3.(x*3+1).(y*3+1)   <- Blocked;
-          board_3x3.(x*3+1).(y*3+2) <- Blocked
-        | Pipe(South, East) ->
-          board_3x3.(x*3+2).(y*3+1) <- Blocked;
-          board_3x3.(x*3+1).(y*3+1)   <- Blocked;
-          board_3x3.(x*3+1).(y*3+2) <- Blocked
-        | _ -> failwith "unexpected field" 
-      else ()));
-  board_3x3
+let blocked_cells_of_pipe = function
+  | Pipe(North, South) -> [(1, 0); (1, 1); (1, 2)]
+  | Pipe(North, East)  -> [(1, 0); (1, 1); (2, 1)]
+  | Pipe(North, West)  -> [(1, 0); (1, 1); (0, 1)]
+  | Pipe(West, East)   -> [(0, 1); (1, 1); (2, 1)]
+  | Pipe(West, South)  -> [(0, 1); (1, 1); (1, 2)]
+  | Pipe(South, East)  -> [(1, 2); (1, 1); (2, 1)]
+  | _ -> failwith "unexpected field"
 
-let show_3x3 board =
-  let dimx = Array.length board in
-  let dimy = Array.length board.(0) in
-  for y = 0 to dimy-1 do
-    for x = 0 to dimx-1 do
-      Printf.printf "%c" (cell_to_char board.(x).(y))
-    done;
-    Printf.printf "\n"
-  done
+module Board3x3 = struct
+  type t =
+  { matrix: cell array array
+  ; dimx: int
+  ; dimy: int}
+
+  let make (board:Board.t) path =
+    let dimx = 3 * board.dimx in
+    let dimy = 3 * board.dimy in
+    let board_3x3 = Array.make_matrix ~dimx ~dimy Free in
+    Array.iteri board.matrix ~f:(fun x row ->
+      Array.iteri row ~f:(fun y cell ->
+        if List.exists path ~f:(fun (x2, y2) -> x = x2 && y = y2)
+      then
+        let blocked_coords = blocked_cells_of_pipe cell in
+        List.iter blocked_coords ~f:(fun (dx, dy) ->
+          board_3x3.(x*3+dx).(y*3+dy) <- Blocked);
+      else ()));
+    { matrix=board_3x3
+    ; dimx=3 * board.dimx
+    ; dimy=3 * board.dimy}
+  let show t =
+    for y = 0 to t.dimy-1 do
+      for x = 0 to t.dimx-1 do
+        Printf.printf "%c" (cell_to_char t.matrix.(x).(y))
+      done;
+      Printf.printf "\n"
+    done
+  
+  let on t x y = not (x < 0 || x >= t.dimx || y < 0 || y >= t.dimy)
+  let is_free t x y =
+    if on t x y
+    then phys_equal t.matrix.(x).(y) Free
+    else false
+  let set_blocked t x y =
+    if on t x y
+    then t.matrix.(x).(y) <- Blocked
+    else ()
+
+  let free_coords t =
+    Array.foldi t.matrix ~init:[] ~f:(fun x lst row ->
+      Array.foldi row ~init:[] ~f:(fun y lst' cell ->
+        match cell with
+        | Free -> (x, y) :: lst'
+        | Blocked -> lst')
+      |> List.append lst)
+    
+  let mark_blocked t =
+    let queue = Queue.create () in
+    Queue.enqueue queue (0, 0);
+    let neighbours x y = [(x-1, y);(x, y-1);(x+1, y);(x, y+1)] in
+    let rec aux () =
+      if Queue.is_empty queue
+      then ()
+      else 
+        let (x, y) = Queue.dequeue_exn queue in
+        set_blocked t x y;
+        neighbours x y
+        |> List.iter ~f:(fun (x2, y2) ->
+          if is_free t x2 y2
+          then 
+            (set_blocked t x2 y2;
+            Queue.enqueue queue (x2, y2))
+          else ());
+        aux ()
+    in
+    aux ()
+end
 
 let solve_2 board =
-  let (start_x, start_y) = find_start_exn board in
-  let neighbours x y = [
-    (x-1, y);
-    (x, y-1);
-    (x+1, y);
-    (x, y+1)
-  ] in
-  (* this step also replaces the start with the appropriate pipe *)
-  let path_length = Option.value_exn (loop board) * 2 in
-  let direction = match board.(start_x).(start_y) with
-    | Pipe (_, d) -> d
-    | _ -> failwith "expect pipe at start!"
-  in
-  let path = Option.value_exn (walk_loop (start_x, start_y, direction) board) in
-  let board_3x3 = transform board path in
-  let is_free x y = 
-    try
-      phys_equal board_3x3.(x).(y) Free
-    with
-      Invalid_argument _ -> false
-  in
-  let set_blocked x y = 
-    try
-      board_3x3.(x).(y) <- Blocked
-    with
-      Invalid_argument _ -> ()
-  in
-  (* 0,0 will always be free and is connected to all fields outside of the loop *)
-  let queue = Queue.create () in
-  Queue.enqueue queue (0, 0);
-  let rec aux () =
-    if Queue.is_empty queue
-    then ()
-    else 
-      let (x, y) = Queue.dequeue_exn queue in
-      set_blocked x y;
-      neighbours x y
-      |> List.iter ~f:(fun (x2, y2) ->
-        if is_free x2 y2
-        then 
-          (set_blocked x2 y2;
-          Queue.enqueue queue (x2, y2))
-        else ());
-      aux ()
-  in
-  aux ();
-  let transform_coordinate x y = (x / 3, y / 3) in
-  (Array.foldi board_3x3 ~init:[] ~f:(fun x lst row ->
-    Array.foldi row ~init:[] ~f:(fun y lst' cell ->
-      match cell with
-      | Free -> (transform_coordinate x y) :: lst'
-      | Blocked -> lst')
-    |> List.append lst)
+  let path = find_start_and_path board in
+  let b3x3 = Board3x3.make board path in
+  Board3x3.mark_blocked b3x3;
+  (Board3x3.free_coords b3x3
+  |> List.map ~f:(fun (x, y) -> (x / 3, y / 3))
   |> List.dedup_and_sort ~compare:(fun (x, y) (x2, y2) ->
       match compare x x2 with
       | 0 -> compare y y2
       | v -> v)
-  |> List.length) - path_length
-  
+  |> List.length) - (List.length path)
+
 let part2 content = 
   parse content
   |> solve_2
