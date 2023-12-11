@@ -51,13 +51,6 @@ module Board = struct
       match Array.findi row ~f:(fun _ v -> phys_equal v Start) with
       | Some (y, _) -> Some (x, y)
       | None -> None)
-  let show t =
-    for y = 0 to t.dimy-1 do
-      for x = 0 to t.dimx-1 do
-        Printf.printf "%c" (char_of_pipe t.matrix.(x).(y))
-      done;
-      Printf.printf "\n"
-    done
   let path_loop t start_x start_y direction =
     let move x y = function
     | North -> (x, y-1, South)
@@ -139,13 +132,6 @@ module Board3x3 = struct
     { matrix=board_3x3
     ; dimx=3 * board.dimx
     ; dimy=3 * board.dimy}
-  let show t =
-    for y = 0 to t.dimy-1 do
-      for x = 0 to t.dimx-1 do
-        Printf.printf "%c" (cell_to_char t.matrix.(x).(y))
-      done;
-      Printf.printf "\n"
-    done
   let on t x y = not (x < 0 || x >= t.dimx || y < 0 || y >= t.dimy)
   let is_free t x y =
     if on t x y
