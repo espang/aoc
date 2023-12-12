@@ -17,26 +17,24 @@
 (def m-f
   (memoize
    (fn [condition damage]
-     (if-not (seq damage)
-       (if (some #(= % \#) condition) 0 1)
-       (if-not (seq condition)
-         0
-         (let [number (first damage)]
-           (if (possible? condition number)
-             (case (first condition)
-               \# (m-f (drop (inc number) condition) (rest damage))
-               \? (+ (m-f (drop (inc number) condition) (rest damage))
-                     (m-f (rest condition) damage)))
-             (case (first condition)
-               \# 0
-               (m-f (rest condition) damage)))))))))
+     (cond
+       (empty? damage)          (if (some #(= % \#) condition) 0 1)
+       (empty? condition)       0
+       (= \. (first condition)) (m-f (rest condition) damage)
+       :else
+       (let [number   (first damage)
+             possible (possible? condition number)]
+         (+ (if possible
+              (m-f (drop (inc number) condition) (rest damage)) 0)
+            (if (= \? (first condition))
+              (m-f (rest condition) damage) 0)))))))
 
 (defn solve [content times]
   (->> content
        str/split-lines
-       (map #(parse-line % times))
-       (map (fn [[condition damage]]
-              (m-f condition damage)))
+       (pmap #(parse-line % times))
+       (pmap (fn [[condition damage]]
+               (m-f condition damage)))
        (reduce + 0)))
 
 (comment
