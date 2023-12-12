@@ -39,6 +39,7 @@ module Board = struct
     ; dimy=dimy}
   let update t x y v = t.matrix.(x).(y) <- v
   let at t x y = try Some t.matrix.(x).(y) with Invalid_argument _ -> None
+  let at_exn t x y = Option.value_exn (at t x y)
   let target_exn t x y dir =
     let v = t.matrix.(x).(y) in
     match v with 
@@ -120,15 +121,12 @@ module Board3x3 = struct
     let dimx = 3 * board.dimx in
     let dimy = 3 * board.dimy in
     let board_3x3 = Array.make_matrix ~dimx ~dimy Free in
-    List.cartesian_product (range board.dimx) (range board.dimy)
-    |> List.iter ~f:(fun (x, y) ->
-        if List.exists path ~f:(fun (x2, y2) -> x = x2 && y = y2)
-        then
-          let blocked_coords = blocked_cells_of_pipe board.matrix.(x).(y) in
-          List.iter blocked_coords ~f:(fun (dx, dy) ->
-            board_3x3.(x*3+dx).(y*3+dy) <- Blocked);
-        else ()
-      );
+    let to_be_marked_as_blocked (x, y) =
+      blocked_cells_of_pipe (Board.at_exn board x y)
+      |> List.map ~f:(fun (dx, dy) -> (3*x+dx, 3*y+dy))
+    in
+    List.concat_map path ~f:to_be_marked_as_blocked
+    |> List.iter  ~f:(fun (x, y) -> board_3x3.(x).(y) <- Blocked);
     { matrix=board_3x3
     ; dimx=3 * board.dimx
     ; dimy=3 * board.dimy}
