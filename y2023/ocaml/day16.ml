@@ -1,41 +1,5 @@
 open Core
 
-module Pair = struct
-  module T = struct
-    type t = int * int
-    let compare (x0, y0) (x1, y1) =
-      match compare x0 x1 with
-      | 0 -> compare y0 y1
-      | n -> n
-
-    let sexp_of_t = Tuple2.sexp_of_t Int.sexp_of_t Int.sexp_of_t
-    let t_of_sexp = Tuple2.t_of_sexp Int.t_of_sexp Int.t_of_sexp
-  end
-
-  include T
-  include Comparable.Make(T)
-end
-
-
-module Triple = struct
-  module T = struct
-    type t = int * int * int
-    let compare (x0, y0, z0) (x1, y1, z1) =
-      match compare x0 x1 with
-      | 0 ->
-        (match compare y0 y1 with
-        | 0 -> compare z0 z1
-        | n -> n)
-      | n -> n
-
-    let sexp_of_t = Tuple3.sexp_of_t Int.sexp_of_t Int.sexp_of_t Int.sexp_of_t
-    let t_of_sexp = Tuple3.t_of_sexp Int.t_of_sexp Int.t_of_sexp Int.t_of_sexp
-  end
-
-  include T
-  include Comparable.Make(T)
-end
-
 type cell =
   | Empty
   | SplitterHorizontal
@@ -131,9 +95,9 @@ let solve ?(start = (East, {row=0; col=0})) board=
         aux energized
   in
   let (dir, {row; col}) = start in
-  let s = Set.add (Set.empty (module Triple)) (int_of_direction dir, row, col) in
+  let s = Set.add (Set.empty (module Aoc.Triple.Triple)) (int_of_direction dir, row, col) in
   aux s
-  |> Set.map (module Pair) ~f:(fun (_, row, pos) -> (row, pos))
+  |> Set.map (module Aoc.Pair.Pair) ~f:(fun (_, row, pos) -> (row, pos))
   |> Set.length
 
 let part1 content = 
