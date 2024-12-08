@@ -67,6 +67,22 @@ const (
 	Right
 )
 
+func ParseDirection(r rune) Direction {
+	switch r {
+	case '>':
+		return Right
+	case '<':
+		return Left
+	case '^':
+		return Up
+	case 'v':
+		return Down
+	}
+
+	// ignore unexpect input and return invalid direction
+	return 0
+}
+
 func (d Direction) Left() Direction {
 	switch d {
 	case Up:

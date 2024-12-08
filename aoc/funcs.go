@@ -45,6 +45,12 @@ func Run[A any](f func(A), vs []A) {
 	}
 }
 
+func Make[A any, B any](f func(A) B, vs []A) []B {
+	var bs []B
+	Run(func(a A) { bs = append(bs, f(a)) }, vs)
+	return bs
+}
+
 func MapTranspose[K, V comparable](m map[K]V) map[V]K {
 	result := map[V]K{}
 	for k, v := range m {
@@ -82,4 +88,54 @@ func Do(n int, f func()) {
 	for i := 0; i < n; i++ {
 		f()
 	}
+}
+
+func All[A any](pred func(A) bool, as []A) bool {
+	for _, a := range as {
+		if !pred(a) {
+			return false
+		}
+	}
+	return true
+}
+
+func Any[A any](pred func(A) bool, as []A) bool {
+	for _, a := range as {
+		if pred(a) {
+			return true
+		}
+	}
+	return false
+}
+
+func Filter[A any](pred func(A) bool, as []A) []A {
+	var result []A
+	for _, a := range as {
+		if pred(a) {
+			result = append(result, a)
+		}
+	}
+	return result
+}
+
+// First returns the first entry for which the predicate function `pred`
+// returns true.
+// The boolean return value returns true when an entry was found and false
+// otherwise.
+func First[A any](pred func(A) bool, as []A) (A, bool) {
+	for _, a := range as {
+		if pred(a) {
+			return a, true
+		}
+	}
+	var a A
+	return a, false
+}
+
+func Reduce[A any, B any](f func(B, A) B, initialValue B, as []A) B {
+	b := initialValue
+	for _, a := range as {
+		b = f(b, a)
+	}
+	return b
 }
